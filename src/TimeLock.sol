@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 import "openzeppelin/governance/TimelockController.sol";
+import "./TokenFund.sol";
 
 /**
  * @title TimeLock Contract
@@ -25,4 +26,8 @@ contract TimeLock is TimelockController {
         address[] memory proposers,
         address[] memory executors
     ) TimelockController(minDelay, proposers, executors, msg.sender) {}
+
+    function acceptOwnership(address _address) external {
+        TokenFund(_address).acceptOwnership();
+    }
 }
