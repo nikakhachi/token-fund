@@ -34,19 +34,13 @@ contract TokenFund is ERC20, DexOperations {
 
         uint halfAmount = amount / 2;
 
-        address[] memory usdcToWethPath = new address[](2);
-        usdcToWethPath[0] = address(usdc);
-        usdcToWethPath[1] = address(weth);
-
-        address[] memory usdcToLinkPath = new address[](2);
-        usdcToLinkPath[0] = address(usdc);
-        usdcToLinkPath[1] = address(link);
-
         (uint256 wethOut, uint256 linkOut) = _swapForBestPrice(
             halfAmount,
             halfAmount,
-            usdcToWethPath,
-            usdcToLinkPath
+            address(usdc),
+            address(weth),
+            address(usdc),
+            address(link)
         );
 
         initialUSDCDeposits[msg.sender] += amount;
@@ -59,19 +53,13 @@ contract TokenFund is ERC20, DexOperations {
 
         uint halfAmount = amount / 2;
 
-        address[] memory usdtToWethPath = new address[](2);
-        usdtToWethPath[0] = address(usdt);
-        usdtToWethPath[1] = address(weth);
-
-        address[] memory usdtToLinkPath = new address[](2);
-        usdtToLinkPath[0] = address(usdt);
-        usdtToLinkPath[1] = address(link);
-
         (uint256 wethOut, uint256 linkOut) = _swapForBestPrice(
             halfAmount,
             halfAmount,
-            usdtToWethPath,
-            usdtToLinkPath
+            address(usdt),
+            address(weth),
+            address(usdt),
+            address(link)
         );
 
         initialUSDTDeposits[msg.sender] += amount;
@@ -91,18 +79,17 @@ contract TokenFund is ERC20, DexOperations {
 
         _burn(msg.sender, shares);
 
-        address[] memory wethToUsdcPath = new address[](2);
-        wethToUsdcPath[0] = address(weth);
-        wethToUsdcPath[1] = address(usdc);
-
-        address[] memory linkToUsdcPath = new address[](2);
-        linkToUsdcPath[0] = address(link);
-        linkToUsdcPath[1] = address(usdc);
-
         (
             uint256 usdcOutForWethIn,
             uint256 usdcOutForLinkIn
-        ) = _swapForBestPrice(wethOut, linkOut, wethToUsdcPath, linkToUsdcPath);
+        ) = _swapForBestPrice(
+                wethOut,
+                linkOut,
+                address(weth),
+                address(usdc),
+                address(link),
+                address(usdc)
+            );
 
         uint finalUsdcValue = usdcOutForWethIn + usdcOutForLinkIn;
 
@@ -131,18 +118,17 @@ contract TokenFund is ERC20, DexOperations {
 
         _burn(msg.sender, shares);
 
-        address[] memory wethToUsdtPath = new address[](2);
-        wethToUsdtPath[0] = address(weth);
-        wethToUsdtPath[1] = address(usdt);
-
-        address[] memory linkToUsdtPath = new address[](2);
-        linkToUsdtPath[0] = address(link);
-        linkToUsdtPath[1] = address(usdt);
-
         (
             uint256 usdtOutForWethIn,
             uint256 usdtOutForLinkIn
-        ) = _swapForBestPrice(wethOut, linkOut, wethToUsdtPath, linkToUsdtPath);
+        ) = _swapForBestPrice(
+                wethOut,
+                linkOut,
+                address(weth),
+                address(usdt),
+                address(link),
+                address(usdt)
+            );
 
         uint finalUsdtValue = usdtOutForWethIn + usdtOutForLinkIn;
 
