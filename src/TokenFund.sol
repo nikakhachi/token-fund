@@ -60,6 +60,42 @@ contract TokenFund {
         console.log("LINK RECEIVED: %s", linkOut);
     }
 
+    function depositUSDT(uint256 amount) external {
+        usdt.safeTransferFrom(msg.sender, address(this), amount);
+
+        uint halfAmount = amount / 2;
+
+        (
+            IUniswapV2Router01 dexForWeth,
+            IUniswapV2Router01 dexForLink,
+            uint256 wethOut,
+            uint256 linkOut,
+            address[] memory wethPath,
+            address[] memory linkPath
+        ) = _getDexPrices(address(usdt), halfAmount);
+
+        _swapTokens(
+            usdt,
+            dexForWeth,
+            dexForLink,
+            halfAmount,
+            wethPath,
+            linkPath
+        );
+
+        console.log("WETH RECEIVED: %s", wethOut);
+        console.log("LINK RECEIVED: %s", linkOut);
+    }
+
+    /**
+     * --------------------------------------------------------------------------
+     * --------------------------------------------------------------------------
+     * SOME CONTRACT FUNCTIONS THAT WILL INVEST LINK AND WETH TOKENS IN MULTIPLE
+     * PROTOCOLS AND PROFIT FROM IT
+     * --------------------------------------------------------------------------
+     * --------------------------------------------------------------------------
+     */
+
     /// @param _stableCoin USDT or USDC
     function _getDexPrices(
         address _stableCoin,
@@ -132,7 +168,7 @@ contract TokenFund {
         address[] memory wethPath,
         address[] memory linkPath
     ) internal {
-        _stableCoin.approve(address(dexForWeth), amount);
+        _stableCoin.safeApprove(address(dexForWeth), amount);
         dexForWeth.swapExactTokensForTokens(
             amount,
             0,
@@ -141,7 +177,7 @@ contract TokenFund {
             block.timestamp
         );
 
-        _stableCoin.approve(address(dexForLink), amount);
+        _stableCoin.safeApprove(address(dexForLink), amount);
         dexForLink.swapExactTokensForTokens(
             amount,
             0,

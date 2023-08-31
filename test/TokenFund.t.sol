@@ -4,8 +4,11 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import "../src/TokenFund.sol";
 import "openzeppelin/token/ERC20/IERC20.sol";
+import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 
 contract TokenFundTest is Test {
+    using SafeERC20 for IERC20;
+
     TokenFund public tokenFund;
 
     address public constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
@@ -31,9 +34,20 @@ contract TokenFundTest is Test {
     }
 
     function testDepositUSDC() public {
+        console.log("------");
         uint amount = 1000000000; /// @dev 1000 $USDC
         deal(USDC, address(this), amount);
         IERC20(USDC).approve(address(tokenFund), amount);
         tokenFund.depositUSDC(amount);
+        console.log("------");
+    }
+
+    function testDepositUSDT() public {
+        console.log("------");
+        uint amount = 1000000000; /// @dev 1000 $USDT
+        deal(USDT, address(this), amount);
+        IERC20(USDT).safeApprove(address(tokenFund), amount);
+        tokenFund.depositUSDT(amount);
+        console.log("------");
     }
 }
