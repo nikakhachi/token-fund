@@ -130,6 +130,51 @@ contract TokenFund is ERC20, DexOperations {
         delete initialUSDCDeposits[msg.sender];
     }
 
+    function withdrawUSDT() external {
+        uint shares = balanceOf(msg.sender);
+        uint wethReserve = weth.balanceOf(address(this));
+        uint linkReserve = link.balanceOf(address(this));
+        uint _totalSupply = totalSupply();
+
+        /// @dev Shares = x△ / x * T = y△ / y * T
+        uint wethOut = (shares * wethReserve) / _totalSupply;
+        uint linkOut = (shares * linkReserve) / _totalSupply;
+
+        _burn(msg.sender, shares);
+
+        (
+            IUniswapV2Router01 dexForWeth,
+            IUniswapV2Router01 dexForLink,
+            uint256 stableOutForWethIn,
+            uint256 stableOutForLinkIn,
+            address[] memory wethPath,
+            address[] memory linkPath
+        ) = _getDexPricesForStables(address(usdt), wethOut, linkOut);
+
+        _getStablesInSwap(
+            dexForWeth,
+            dexForLink,
+            wethOut,
+            linkOut,
+            wethPath,
+            linkPath
+        );
+
+        uint finalUsdtValue = stableOutForWethIn + stableOutForLinkIn;
+
+        if (finalUsdtValue > (initialUSDTDeposits[msg.sender] * 110) / 100) {
+            uint profit = finalUsdtValue - initialUSDTDeposits[msg.sender];
+            usdt.safeTransfer(
+                msg.sender,
+                initialUSDTDeposits[msg.sender] + (profit * 9) / 10
+            );
+        } else {
+            usdt.safeTransfer(msg.sender, finalUsdtValue);
+        }
+
+        delete initialUSDTDeposits[msg.sender];
+    }
+
     /**
      * --------------------------------------------------------------------------
      * --------------------------------------------------------------------------

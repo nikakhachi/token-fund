@@ -37,16 +37,35 @@ contract TokenFundTest is Test {
         uint amount = 1000000000; /// @dev 1000 $USDC
         deal(USDC, address(this), amount);
         IERC20(USDC).approve(address(tokenFund), amount);
+        console.log(
+            "USDC BEFORE DEPOSITING: %s",
+            IERC20(USDC).balanceOf(address(this))
+        );
         tokenFund.depositUSDC(amount);
-        // assertEq(tokenFund.initialUSDCDeposits(address(this)), amount);
+        assertEq(tokenFund.initialUSDCDeposits(address(this)), amount);
         tokenFund.withdrawUSDC();
+        console.log(
+            "USDC AFTER WITHDRAWING: %s",
+            IERC20(USDC).balanceOf(address(this))
+        );
+        assertEq(tokenFund.initialUSDCDeposits(address(this)), 0);
     }
 
-    // function testDepositUSDT() public {
-    //     uint amount = 1000000000; /// @dev 1000 $USDT
-    //     deal(USDT, address(this), amount);
-    //     IERC20(USDT).safeApprove(address(tokenFund), amount);
-    //     tokenFund.depositUSDT(amount);
-    //     assertEq(tokenFund.initialUSDTDeposits(address(this)), amount);
-    // }
+    function testDepositUSDT() public {
+        uint amount = 1000000000; /// @dev 1000 $USDT
+        deal(USDT, address(this), amount);
+        IERC20(USDT).safeApprove(address(tokenFund), amount);
+        console.log(
+            "USDT BEFORE DEPOSITING: %s",
+            IERC20(USDT).balanceOf(address(this))
+        );
+        tokenFund.depositUSDT(amount);
+        assertEq(tokenFund.initialUSDTDeposits(address(this)), amount);
+        tokenFund.withdrawUSDT();
+        console.log(
+            "USDT AFTER WITHDRAWING: %s",
+            IERC20(USDT).balanceOf(address(this))
+        );
+        assertEq(tokenFund.initialUSDTDeposits(address(this)), 0);
+    }
 }
