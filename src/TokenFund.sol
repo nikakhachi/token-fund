@@ -16,6 +16,12 @@ contract TokenFund is
 {
     using SafeERC20 for ERC20;
 
+    event ProfitMade(
+        address indexed stableCoin,
+        uint256 indexed amount,
+        uint256 indexed timestamp
+    );
+
     uint16 public immutable profitFee; /// @dev 100 = 1%
 
     mapping(address => uint256) public initialUSDCDeposits;
@@ -116,13 +122,13 @@ contract TokenFund is
         uint initialUsdcDeposit = initialUSDCDeposits[msg.sender];
 
         if (finalUsdcValue > initialUsdcDeposit) {
-            uint profit = finalUsdcValue - initialUsdcDeposit;
+            uint allProfit = finalUsdcValue - initialUsdcDeposit;
+            uint contractProfit = (allProfit * profitFee) / 10000;
             usdc.safeTransfer(
                 msg.sender,
-                initialUSDCDeposits[msg.sender] +
-                    (profit * (10000 - profitFee)) /
-                    10000
+                initialUSDCDeposits[msg.sender] + allProfit - contractProfit
             );
+            emit ProfitMade(address(usdc), contractProfit, block.timestamp);
         } else {
             usdc.safeTransfer(msg.sender, finalUsdcValue);
         }
@@ -158,13 +164,13 @@ contract TokenFund is
         uint initialUsdtDeposit = initialUSDTDeposits[msg.sender];
 
         if (finalUsdtValue > initialUsdtDeposit) {
-            uint profit = finalUsdtValue - initialUsdtDeposit;
+            uint allProfit = finalUsdtValue - initialUsdtDeposit;
+            uint contractProfit = (allProfit * profitFee) / 10000;
             usdt.safeTransfer(
                 msg.sender,
-                initialUSDTDeposits[msg.sender] +
-                    (profit * (10000 - profitFee)) /
-                    10000
+                initialUSDTDeposits[msg.sender] + allProfit - contractProfit
             );
+            emit ProfitMade(address(usdt), contractProfit, block.timestamp);
         } else {
             usdt.safeTransfer(msg.sender, finalUsdtValue);
         }
