@@ -131,8 +131,13 @@ contract TokenFund is
     /// @dev Sure, it can be done in one function but this way we are making contract gas efficient for the users, as opposed to deployer
     function withdrawUSDC() external {
         uint shares = balanceOf(msg.sender);
+
+        /// @dev The function doesn't explicitly store the reserves of WETH and ETH in the contract,
+        /// @dev Because if some actor just transferres funds to the contract, contract will not lose anything,
+        /// @dev quite the opposite, the shares for the users who have deposited will become higher.
         uint wethReserve = weth.balanceOf(address(this));
         uint linkReserve = link.balanceOf(address(this));
+
         uint _totalSupply = totalSupply();
 
         /// @dev This is the formula used in AMM pools to calculate shares in the pool
@@ -179,8 +184,13 @@ contract TokenFund is
     /// @dev Sure, it can be done in one function but this way we are making contract gas efficient for the users, as opposed to deployer
     function withdrawUSDT() external {
         uint shares = balanceOf(msg.sender);
+
+        /// @dev The function doesn't explicitly store the reserves of WETH and ETH in the contract,
+        /// @dev Because if some actor just transferres funds to the contract, contract will not lose anything,
+        /// @dev quite the opposite, the shares for the users who have deposited will become higher.
         uint wethReserve = weth.balanceOf(address(this));
         uint linkReserve = link.balanceOf(address(this));
+
         uint _totalSupply = totalSupply();
 
         /// @dev This is the formula used in AMM pools to calculate shares in the pool
