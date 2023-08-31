@@ -9,7 +9,7 @@ This project implements an Governable TokenFund smart contract, with the impleme
 - On the user withdrawal, the tokens allocated for the user will be calculated by the shares, swapped to USDT or USDC and transferred back to user.
 - If the contract made some profit on the user's deposit, contract will take 10% of the profit.
 
-The development tool used is the Foundry where the contracts and the tests are written, and then there's Hardhat integrated which is used for writing the deployment and upgrade scripts.
+The development tool used is the Foundry where everything is written including the tests and the scripts.
 
 ## Table of Contents
 
