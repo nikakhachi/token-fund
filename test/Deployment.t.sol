@@ -3,7 +3,13 @@ pragma solidity ^0.8.13;
 
 import "./TokenFund.t.sol";
 
+/**
+ * @title DeploymentTest Contract
+ * @author Nika Khachiashvili
+ * @dev Contract for initial contracts values on deployment
+ */
 contract DeploymentTest is TokenFundTest {
+    /// @dev testing initial values on deployment
     function testDeployment() public {
         assertEq(tokenFund.profitFee(), PROFIT_FEE);
         assertEq(address(tokenFund.usdc()), USDC);

@@ -3,6 +3,11 @@ pragma solidity ^0.8.13;
 
 import "./TokenFund.t.sol";
 
+/**
+ * @title GovernanceTest Contract
+ * @author Nika Khachiashvili
+ * @dev Contract for testing governance functionalities
+ */
 contract GovernanceTest is TokenFundTest {
     /// @dev variables for proposing proposals
     address[] public targets;
@@ -10,8 +15,10 @@ contract GovernanceTest is TokenFundTest {
     bytes[] public calldatas;
     string public description;
 
+    /// @dev Addresses that will have Token Fund Shares and have power in voting
     address[3] public stableProviders = [address(1), address(2), address(3)];
 
+    /// @dev Testing the flow of successful proposal
     function testSuccesfullProposal() public {
         assertEq(tokenFund.hasProposalExecuted(), false);
 
@@ -40,6 +47,7 @@ contract GovernanceTest is TokenFundTest {
         assertEq(tokenFund.hasProposalExecuted(), true);
     }
 
+    /// @dev Testing the flow of not succesfull proposal
     function testNotSuccesfullProposal() public {
         /// @dev This kind of value distribution makes sure providers get somewhere nearly same amount of fund tokens
         /// @dev So when 2 votes negative, the proposal will fail
@@ -55,6 +63,7 @@ contract GovernanceTest is TokenFundTest {
         );
     }
 
+    /// @dev Testing the flow of not active proposal
     function testNotActiveProposal() public {
         uint256 amount = 10 * 10 ** 6;
 
@@ -70,6 +79,7 @@ contract GovernanceTest is TokenFundTest {
         myGovernor.castVote(proposalId, 1);
     }
 
+    /// @dev Testing the flow of non ready proposal operation
     function testNonReadyProposalOperation() public {
         uint256 amount = 10 * 10 ** 6;
 
@@ -92,6 +102,8 @@ contract GovernanceTest is TokenFundTest {
             keccak256(bytes(description))
         );
     }
+
+    /// @dev Helper and reusable functions to make tests easier
 
     function _beforeEach(uint256 usdt1, uint256 usdt2, uint256 usdt3) internal {
         targets = [address(tokenFund)];

@@ -8,25 +8,32 @@ import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "../src/MyGovernor.sol";
 import "../src/TimeLock.sol";
 
+/**
+ * @title TokenFundTest Contract
+ * @author Nika Khachiashvili
+ * @dev Main test contract for testing the Token Fund
+ */
 contract TokenFundTest is Test {
+    /// @dev It's important to specify EXACTLY this number when running forge test with fork
+    /// @dev Otherwise Governance tests will fail
     uint256 public constant STARTING_MAINNET_BLOCK = 18032971;
 
+    /// @dev contracts
     TokenFund public tokenFund;
     MyGovernor public myGovernor;
     TimeLock public timeLock;
 
+    /// @dev Mainnet addresses
     address public constant USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
     address public constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address public constant USDC = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
     address public constant LINK = 0x514910771AF9Ca656af840dff83E8264EcF986CA;
-
     address public constant UNISWAP_V2_ROUTER =
         0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D;
-
     address public constant SUSHISWAP_ROUTER =
         0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F;
 
-    uint16 public constant PROFIT_FEE = 1000;
+    uint16 public constant PROFIT_FEE = 1000; /// @dev Profit fee for the Token Fund contract
 
     uint256 public constant TIMELOCK_MIN_DELAY = 1 weeks; /// @dev minDelay arg for TimeLock contract
 
@@ -37,6 +44,7 @@ contract TokenFundTest is Test {
 
     address[] public emptyArray; /// @dev for utility reasons
 
+    /// @dev Setting up the testing environment
     function setUp() public {
         timeLock = new TimeLock(TIMELOCK_MIN_DELAY, emptyArray, emptyArray);
 
