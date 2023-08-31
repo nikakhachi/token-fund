@@ -42,21 +42,7 @@ contract TokenFund is ERC20, DexOperations {
         usdcToLinkPath[0] = address(usdc);
         usdcToLinkPath[1] = address(link);
 
-        (
-            IUniswapV2Router01 dexForWeth,
-            IUniswapV2Router01 dexForLink,
-            uint256 wethOut,
-            uint256 linkOut
-        ) = _getDexBestPrices(
-                halfAmount,
-                halfAmount,
-                usdcToWethPath,
-                usdcToLinkPath
-            );
-
-        _swapTokens(
-            dexForWeth,
-            dexForLink,
+        (uint256 wethOut, uint256 linkOut) = _swapForBestPrice(
             halfAmount,
             halfAmount,
             usdcToWethPath,
@@ -81,21 +67,7 @@ contract TokenFund is ERC20, DexOperations {
         usdtToLinkPath[0] = address(usdt);
         usdtToLinkPath[1] = address(link);
 
-        (
-            IUniswapV2Router01 dexForWeth,
-            IUniswapV2Router01 dexForLink,
-            uint256 wethOut,
-            uint256 linkOut
-        ) = _getDexBestPrices(
-                halfAmount,
-                halfAmount,
-                usdtToWethPath,
-                usdtToLinkPath
-            );
-
-        _swapTokens(
-            dexForWeth,
-            dexForLink,
+        (uint256 wethOut, uint256 linkOut) = _swapForBestPrice(
             halfAmount,
             halfAmount,
             usdtToWethPath,
@@ -128,20 +100,9 @@ contract TokenFund is ERC20, DexOperations {
         linkToUsdcPath[1] = address(usdc);
 
         (
-            IUniswapV2Router01 dexForWethToUsdc,
-            IUniswapV2Router01 dexForLinkToUsdc,
             uint256 usdcOutForWethIn,
             uint256 usdcOutForLinkIn
-        ) = _getDexBestPrices(wethOut, linkOut, wethToUsdcPath, linkToUsdcPath);
-
-        _swapTokens(
-            dexForWethToUsdc,
-            dexForLinkToUsdc,
-            wethOut,
-            linkOut,
-            wethToUsdcPath,
-            linkToUsdcPath
-        );
+        ) = _swapForBestPrice(wethOut, linkOut, wethToUsdcPath, linkToUsdcPath);
 
         uint finalUsdcValue = usdcOutForWethIn + usdcOutForLinkIn;
 
@@ -179,20 +140,9 @@ contract TokenFund is ERC20, DexOperations {
         linkToUsdtPath[1] = address(usdt);
 
         (
-            IUniswapV2Router01 dexForWethToUsdt,
-            IUniswapV2Router01 dexForLinkToUsdt,
             uint256 usdtOutForWethIn,
             uint256 usdtOutForLinkIn
-        ) = _getDexBestPrices(wethOut, linkOut, wethToUsdtPath, linkToUsdtPath);
-
-        _swapTokens(
-            dexForWethToUsdt,
-            dexForLinkToUsdt,
-            wethOut,
-            linkOut,
-            wethToUsdtPath,
-            linkToUsdtPath
-        );
+        ) = _swapForBestPrice(wethOut, linkOut, wethToUsdtPath, linkToUsdtPath);
 
         uint finalUsdtValue = usdtOutForWethIn + usdtOutForLinkIn;
 
