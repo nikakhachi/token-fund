@@ -7,10 +7,13 @@ import "./DexOperations.sol";
 contract TokenFund is ERC20, DexOperations {
     using SafeERC20 for ERC20;
 
+    uint16 public immutable profitFee; /// @dev 100 = 1%
+
     mapping(address => uint256) public initialUSDCDeposits;
     mapping(address => uint256) public initialUSDTDeposits;
 
     constructor(
+        uint16 _profitFee,
         address _usdc,
         address _usdt,
         address _weth,
@@ -27,7 +30,9 @@ contract TokenFund is ERC20, DexOperations {
             _uniswapV2Router,
             _sushiswapRouter
         )
-    {}
+    {
+        profitFee = _profitFee;
+    }
 
     function depositUSDC(uint256 amount) external {
         usdc.safeTransferFrom(msg.sender, address(this), amount);
@@ -92,12 +97,15 @@ contract TokenFund is ERC20, DexOperations {
             );
 
         uint finalUsdcValue = usdcOutForWethIn + usdcOutForLinkIn;
+        uint initialUsdcDeposit = initialUSDCDeposits[msg.sender];
 
-        if (finalUsdcValue > (initialUSDCDeposits[msg.sender] * 110) / 100) {
-            uint profit = finalUsdcValue - initialUSDCDeposits[msg.sender];
+        if (finalUsdcValue > initialUsdcDeposit) {
+            uint profit = finalUsdcValue - initialUsdcDeposit;
             usdc.safeTransfer(
                 msg.sender,
-                initialUSDCDeposits[msg.sender] + (profit * 9) / 10
+                initialUSDCDeposits[msg.sender] +
+                    (profit * (10000 - profitFee)) /
+                    10000
             );
         } else {
             usdc.safeTransfer(msg.sender, finalUsdcValue);
@@ -131,12 +139,15 @@ contract TokenFund is ERC20, DexOperations {
             );
 
         uint finalUsdtValue = usdtOutForWethIn + usdtOutForLinkIn;
+        uint initialUsdtDeposit = initialUSDTDeposits[msg.sender];
 
-        if (finalUsdtValue > (initialUSDTDeposits[msg.sender] * 110) / 100) {
-            uint profit = finalUsdtValue - initialUSDTDeposits[msg.sender];
+        if (finalUsdtValue > initialUsdtDeposit) {
+            uint profit = finalUsdtValue - initialUsdtDeposit;
             usdt.safeTransfer(
                 msg.sender,
-                initialUSDTDeposits[msg.sender] + (profit * 9) / 10
+                initialUSDTDeposits[msg.sender] +
+                    (profit * (10000 - profitFee)) /
+                    10000
             );
         } else {
             usdt.safeTransfer(msg.sender, finalUsdtValue);

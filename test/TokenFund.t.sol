@@ -22,8 +22,11 @@ contract TokenFundTest is Test {
     address public constant SUSHISWAP_ROUTER =
         0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F;
 
+    uint16 public constant PROFIT_FEE = 1000;
+
     function setUp() public {
         tokenFund = new TokenFund(
+            PROFIT_FEE,
             USDC,
             USDT,
             WETH,
