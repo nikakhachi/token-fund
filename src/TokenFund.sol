@@ -17,6 +17,9 @@ contract TokenFund {
     IUniswapV2Router01 public immutable uniswapV2Router;
     IUniswapV2Router01 public immutable sushiswapRouter;
 
+    mapping(address => uint256) public initialUSDCDeposits;
+    mapping(address => uint256) public initialUSDTDeposits;
+
     constructor(
         address _usdc,
         address _usdt,
@@ -56,8 +59,7 @@ contract TokenFund {
             linkPath
         );
 
-        console.log("WETH RECEIVED: %s", wethOut);
-        console.log("LINK RECEIVED: %s", linkOut);
+        initialUSDCDeposits[msg.sender] += amount;
     }
 
     function depositUSDT(uint256 amount) external {
@@ -83,8 +85,7 @@ contract TokenFund {
             linkPath
         );
 
-        console.log("WETH RECEIVED: %s", wethOut);
-        console.log("LINK RECEIVED: %s", linkOut);
+        initialUSDTDeposits[msg.sender] += amount;
     }
 
     /**

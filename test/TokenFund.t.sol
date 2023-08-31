@@ -34,20 +34,18 @@ contract TokenFundTest is Test {
     }
 
     function testDepositUSDC() public {
-        console.log("------");
         uint amount = 1000000000; /// @dev 1000 $USDC
         deal(USDC, address(this), amount);
         IERC20(USDC).approve(address(tokenFund), amount);
         tokenFund.depositUSDC(amount);
-        console.log("------");
+        assertEq(tokenFund.initialUSDCDeposits(address(this)), amount);
     }
 
     function testDepositUSDT() public {
-        console.log("------");
         uint amount = 1000000000; /// @dev 1000 $USDT
         deal(USDT, address(this), amount);
         IERC20(USDT).safeApprove(address(tokenFund), amount);
         tokenFund.depositUSDT(amount);
-        console.log("------");
+        assertEq(tokenFund.initialUSDTDeposits(address(this)), amount);
     }
 }
