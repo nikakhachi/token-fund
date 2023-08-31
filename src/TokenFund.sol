@@ -1,10 +1,19 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "./Math.sol";
+import "./MathHelpers.sol";
 import "./DexOperations.sol";
+import "openzeppelin/access/Ownable2Step.sol";
+import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
+import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 
-contract TokenFund is ERC20, DexOperations {
+contract TokenFund is
+    DexOperations,
+    Ownable2Step,
+    ERC20,
+    ERC20Permit,
+    ERC20Votes
+{
     using SafeERC20 for ERC20;
 
     uint16 public immutable profitFee; /// @dev 100 = 1%
@@ -12,7 +21,12 @@ contract TokenFund is ERC20, DexOperations {
     mapping(address => uint256) public initialUSDCDeposits;
     mapping(address => uint256) public initialUSDTDeposits;
 
+    /// @dev This variable is just for DEMONSTRATION Purposes on how the governance works
+    /// @dev I'll be using timeLockFunction() in tests to try to vote and execute proposal to make this variable true
+    bool public hasProposalExecuted;
+
     constructor(
+        address _timelock,
         uint16 _profitFee,
         address _usdc,
         address _usdt,
@@ -22,6 +36,7 @@ contract TokenFund is ERC20, DexOperations {
         address _sushiswapRouter
     )
         ERC20("Token Fund Share", "TFS")
+        ERC20Permit("Token Fund Share")
         DexOperations(
             _usdc,
             _usdt,
@@ -31,6 +46,7 @@ contract TokenFund is ERC20, DexOperations {
             _sushiswapRouter
         )
     {
+        transferOwnership(_timelock);
         profitFee = _profitFee;
     }
 
@@ -170,14 +186,44 @@ contract TokenFund is ERC20, DexOperations {
         uint256 shares;
         if (_totalSupply == 0) {
             /// @dev Liquidity/Shares = root from xy
-            shares = Math.sqrt(wethOut * linkOut);
+            shares = MathHelpers.sqrt(wethOut * linkOut);
         } else {
             /// @dev Shares = x△ / x * T = y△ / y * T
-            shares = Math.min(
+            shares = MathHelpers.min(
                 (wethOut * _totalSupply) / weth.balanceOf(address(this)),
                 (linkOut * _totalSupply) / link.balanceOf(address(this))
             );
         }
         _mint(msg.sender, shares);
+    }
+
+    /// @dev This function is just for DEMONSTRATION Purposes on how the governance works
+    /// @dev I'm using this function in tests to propose, vote and execute proposals
+    function timeLockFunction() external onlyOwner {
+        hasProposalExecuted = true;
+    }
+
+    // The functions below are overrides required by Solidity.
+
+    function _afterTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20, ERC20Votes) {
+        super._afterTokenTransfer(from, to, amount);
+    }
+
+    function _mint(
+        address to,
+        uint256 amount
+    ) internal override(ERC20, ERC20Votes) {
+        super._mint(to, amount);
+    }
+
+    function _burn(
+        address account,
+        uint256 amount
+    ) internal override(ERC20, ERC20Votes) {
+        super._burn(account, amount);
     }
 }
