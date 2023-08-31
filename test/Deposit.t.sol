@@ -55,12 +55,12 @@ contract DepositTest is TokenFundTest {
 
     /// @dev test the invalid USDC deposit
     function testDepositInvalidStableCoinAsUSDC(uint64 amount) public {
-        vm.assume(amount > 10 ** 18); // More than 1$DAI
+        vm.assume(amount > 10 ** 18); // More than 1$dai
 
-        address DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+        address dai = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
-        deal(DAI, address(this), amount);
-        IERC20(DAI).safeApprove(address(tokenFund), amount);
+        deal(dai, address(this), amount);
+        IERC20(dai).safeApprove(address(tokenFund), amount);
 
         vm.expectRevert();
         tokenFund.depositUSDC(amount);
@@ -68,12 +68,12 @@ contract DepositTest is TokenFundTest {
 
     /// @dev test the invalid USDT deposit
     function testDepositInvalidStableCoinAsUSDT(uint64 amount) public {
-        vm.assume(amount > 10 ** 18); // More than 1$DAI
+        vm.assume(amount > 10 ** 18); // More than 1$dai
 
-        address DAI = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
+        address dai = 0x6B175474E89094C44Da98b954EedeAC495271d0F;
 
-        deal(DAI, address(this), amount);
-        IERC20(DAI).safeApprove(address(tokenFund), amount);
+        deal(dai, address(this), amount);
+        IERC20(dai).safeApprove(address(tokenFund), amount);
 
         vm.expectRevert();
         tokenFund.depositUSDT(amount);
