@@ -34,22 +34,33 @@ contract TokenFund is ERC20, DexOperations {
 
         uint halfAmount = amount / 2;
 
+        address[] memory usdcToWethPath = new address[](2);
+        usdcToWethPath[0] = address(usdc);
+        usdcToWethPath[1] = address(weth);
+
+        address[] memory usdcToLinkPath = new address[](2);
+        usdcToLinkPath[0] = address(usdc);
+        usdcToLinkPath[1] = address(link);
+
         (
             IUniswapV2Router01 dexForWeth,
             IUniswapV2Router01 dexForLink,
             uint256 wethOut,
-            uint256 linkOut,
-            address[] memory wethPath,
-            address[] memory linkPath
-        ) = _getDexPricesForTokens(address(usdc), halfAmount);
+            uint256 linkOut
+        ) = _getDexBestPrices(
+                halfAmount,
+                halfAmount,
+                usdcToWethPath,
+                usdcToLinkPath
+            );
 
         _swapTokens(
             usdc,
             dexForWeth,
             dexForLink,
             halfAmount,
-            wethPath,
-            linkPath
+            usdcToWethPath,
+            usdcToLinkPath
         );
 
         initialUSDCDeposits[msg.sender] += amount;
@@ -62,22 +73,33 @@ contract TokenFund is ERC20, DexOperations {
 
         uint halfAmount = amount / 2;
 
+        address[] memory usdtToWethPath = new address[](2);
+        usdtToWethPath[0] = address(usdt);
+        usdtToWethPath[1] = address(weth);
+
+        address[] memory usdtToLinkPath = new address[](2);
+        usdtToLinkPath[0] = address(usdt);
+        usdtToLinkPath[1] = address(link);
+
         (
             IUniswapV2Router01 dexForWeth,
             IUniswapV2Router01 dexForLink,
             uint256 wethOut,
-            uint256 linkOut,
-            address[] memory wethPath,
-            address[] memory linkPath
-        ) = _getDexPricesForTokens(address(usdt), halfAmount);
+            uint256 linkOut
+        ) = _getDexBestPrices(
+                halfAmount,
+                halfAmount,
+                usdtToWethPath,
+                usdtToLinkPath
+            );
 
         _swapTokens(
             usdt,
             dexForWeth,
             dexForLink,
             halfAmount,
-            wethPath,
-            linkPath
+            usdtToWethPath,
+            usdtToLinkPath
         );
 
         initialUSDTDeposits[msg.sender] += amount;
@@ -97,25 +119,31 @@ contract TokenFund is ERC20, DexOperations {
 
         _burn(msg.sender, shares);
 
+        address[] memory wethToUsdcPath = new address[](2);
+        wethToUsdcPath[0] = address(weth);
+        wethToUsdcPath[1] = address(usdc);
+
+        address[] memory linkToUsdcPath = new address[](2);
+        linkToUsdcPath[0] = address(link);
+        linkToUsdcPath[1] = address(usdc);
+
         (
-            IUniswapV2Router01 dexForWeth,
-            IUniswapV2Router01 dexForLink,
-            uint256 stableOutForWethIn,
-            uint256 stableOutForLinkIn,
-            address[] memory wethPath,
-            address[] memory linkPath
-        ) = _getDexPricesForStables(address(usdc), wethOut, linkOut);
+            IUniswapV2Router01 dexForWethToUsdc,
+            IUniswapV2Router01 dexForLinkToUsdc,
+            uint256 usdcOutForWethIn,
+            uint256 usdcOutForLinkIn
+        ) = _getDexBestPrices(wethOut, linkOut, wethToUsdcPath, linkToUsdcPath);
 
         _getStablesInSwap(
-            dexForWeth,
-            dexForLink,
+            dexForWethToUsdc,
+            dexForLinkToUsdc,
             wethOut,
             linkOut,
-            wethPath,
-            linkPath
+            wethToUsdcPath,
+            linkToUsdcPath
         );
 
-        uint finalUsdcValue = stableOutForWethIn + stableOutForLinkIn;
+        uint finalUsdcValue = usdcOutForWethIn + usdcOutForLinkIn;
 
         if (finalUsdcValue > (initialUSDCDeposits[msg.sender] * 110) / 100) {
             uint profit = finalUsdcValue - initialUSDCDeposits[msg.sender];
@@ -136,31 +164,39 @@ contract TokenFund is ERC20, DexOperations {
         uint linkReserve = link.balanceOf(address(this));
         uint _totalSupply = totalSupply();
 
+        console.log(linkReserve);
+
         /// @dev Shares = x△ / x * T = y△ / y * T
         uint wethOut = (shares * wethReserve) / _totalSupply;
         uint linkOut = (shares * linkReserve) / _totalSupply;
 
         _burn(msg.sender, shares);
 
+        address[] memory wethToUsdtPath = new address[](2);
+        wethToUsdtPath[0] = address(weth);
+        wethToUsdtPath[1] = address(usdt);
+
+        address[] memory linkToUsdtPath = new address[](2);
+        linkToUsdtPath[0] = address(link);
+        linkToUsdtPath[1] = address(usdt);
+
         (
-            IUniswapV2Router01 dexForWeth,
-            IUniswapV2Router01 dexForLink,
-            uint256 stableOutForWethIn,
-            uint256 stableOutForLinkIn,
-            address[] memory wethPath,
-            address[] memory linkPath
-        ) = _getDexPricesForStables(address(usdt), wethOut, linkOut);
+            IUniswapV2Router01 dexForWethToUsdt,
+            IUniswapV2Router01 dexForLinkToUsdt,
+            uint256 usdtOutForWethIn,
+            uint256 usdtOutForLinkIn
+        ) = _getDexBestPrices(wethOut, linkOut, wethToUsdtPath, linkToUsdtPath);
 
         _getStablesInSwap(
-            dexForWeth,
-            dexForLink,
+            dexForWethToUsdt,
+            dexForLinkToUsdt,
             wethOut,
             linkOut,
-            wethPath,
-            linkPath
+            wethToUsdtPath,
+            linkToUsdtPath
         );
 
-        uint finalUsdtValue = stableOutForWethIn + stableOutForLinkIn;
+        uint finalUsdtValue = usdtOutForWethIn + usdtOutForLinkIn;
 
         if (finalUsdtValue > (initialUSDTDeposits[msg.sender] * 110) / 100) {
             uint profit = finalUsdtValue - initialUSDTDeposits[msg.sender];
@@ -175,14 +211,14 @@ contract TokenFund is ERC20, DexOperations {
         delete initialUSDTDeposits[msg.sender];
     }
 
-    /**
-     * --------------------------------------------------------------------------
-     * --------------------------------------------------------------------------
-     * SOME CONTRACT FUNCTIONS THAT WILL INVEST LINK AND WETH TOKENS IN MULTIPLE
-     * PROTOCOLS AND PROFIT FROM IT
-     * --------------------------------------------------------------------------
-     * --------------------------------------------------------------------------
-     */
+    // /**
+    //  * --------------------------------------------------------------------------
+    //  * --------------------------------------------------------------------------
+    //  * SOME CONTRACT FUNCTIONS THAT WILL INVEST LINK AND WETH TOKENS IN MULTIPLE
+    //  * PROTOCOLS AND PROFIT FROM IT
+    //  * --------------------------------------------------------------------------
+    //  * --------------------------------------------------------------------------
+    //  */
 
     function _mintShares(uint256 wethOut, uint256 linkOut) internal {
         uint256 _totalSupply = totalSupply();

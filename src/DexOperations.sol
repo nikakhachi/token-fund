@@ -33,122 +33,45 @@ contract DexOperations {
         sushiswapRouter = IUniswapV2Router01(_sushiswapRouter);
     }
 
-    /// @param _stableCoin USDT or USDC
-    function _getDexPricesForTokens(
-        address _stableCoin,
-        uint256 _amountIn
+    function _getDexBestPrices(
+        uint256 _amount1In,
+        uint256 _amount2In,
+        address[] memory _path1,
+        address[] memory _path2
     )
         internal
         view
         returns (
-            IUniswapV2Router01 dexForWeth,
-            IUniswapV2Router01 dexForLink,
-            uint256 wethOut,
-            uint256 linkOut,
-            address[] memory wethPath,
-            address[] memory linkPath
+            IUniswapV2Router01 dexForToken0,
+            IUniswapV2Router01 dexForToken1,
+            uint256 token0Out,
+            uint256 token1Out
         )
     {
-        wethPath = new address[](2);
-        wethPath[0] = address(_stableCoin);
-        wethPath[1] = address(weth);
+        uint256 uni0Out = uniswapV2Router.getAmountsOut(_amount1In, _path1)[1];
+        uint256 sushi0Out = sushiswapRouter.getAmountsOut(_amount1In, _path1)[
+            1
+        ];
 
-        uint256 uniswapWethOut = uniswapV2Router.getAmountsOut(
-            _amountIn,
-            wethPath
-        )[1];
-        uint256 sushiswapWethOut = sushiswapRouter.getAmountsOut(
-            _amountIn,
-            wethPath
-        )[1];
+        uint256 uni1Out = uniswapV2Router.getAmountsOut(_amount2In, _path2)[1];
+        uint256 sushi1Out = sushiswapRouter.getAmountsOut(_amount2In, _path2)[
+            1
+        ];
 
-        linkPath = new address[](2);
-        linkPath[0] = address(_stableCoin);
-        linkPath[1] = address(link);
-
-        uint256 uniswapLinkOut = uniswapV2Router.getAmountsOut(
-            _amountIn,
-            linkPath
-        )[1];
-        uint256 sushiswapLinkOut = sushiswapRouter.getAmountsOut(
-            _amountIn,
-            linkPath
-        )[1];
-
-        if (uniswapWethOut > sushiswapWethOut) {
-            wethOut = uniswapWethOut;
-            dexForWeth = uniswapV2Router;
+        if (uni0Out > sushi0Out) {
+            token0Out = uni0Out;
+            dexForToken0 = uniswapV2Router;
         } else {
-            wethOut = sushiswapWethOut;
-            dexForWeth = sushiswapRouter;
+            token0Out = sushi0Out;
+            dexForToken0 = sushiswapRouter;
         }
 
-        if (uniswapLinkOut > sushiswapLinkOut) {
-            linkOut = uniswapLinkOut;
-            dexForLink = uniswapV2Router;
+        if (uni1Out > sushi1Out) {
+            token1Out = uni1Out;
+            dexForToken1 = uniswapV2Router;
         } else {
-            linkOut = sushiswapLinkOut;
-            dexForLink = sushiswapRouter;
-        }
-    }
-
-    /// @param _stableCoin USDT or USDC
-    function _getDexPricesForStables(
-        address _stableCoin,
-        uint256 _wethAmountIn,
-        uint256 _linkAmountIn
-    )
-        internal
-        view
-        returns (
-            IUniswapV2Router01 dexForWeth,
-            IUniswapV2Router01 dexForLink,
-            uint256 stableOutForWethIn,
-            uint256 stableOutForLinkIn,
-            address[] memory wethPath,
-            address[] memory linkPath
-        )
-    {
-        wethPath = new address[](2);
-        wethPath[0] = address(weth);
-        wethPath[1] = address(_stableCoin);
-
-        uint256 uniswapStableOutForWethIn = uniswapV2Router.getAmountsOut(
-            _wethAmountIn,
-            wethPath
-        )[1];
-        uint256 sushiswapStableOutForWethIn = sushiswapRouter.getAmountsOut(
-            _wethAmountIn,
-            wethPath
-        )[1];
-
-        linkPath = new address[](2);
-        linkPath[0] = address(link);
-        linkPath[1] = address(_stableCoin);
-
-        uint256 uniswapStableOutForLinkIn = uniswapV2Router.getAmountsOut(
-            _linkAmountIn,
-            linkPath
-        )[1];
-        uint256 sushiswapStableOutForLinkIn = sushiswapRouter.getAmountsOut(
-            _linkAmountIn,
-            linkPath
-        )[1];
-
-        if (uniswapStableOutForWethIn > sushiswapStableOutForWethIn) {
-            stableOutForWethIn = uniswapStableOutForWethIn;
-            dexForWeth = uniswapV2Router;
-        } else {
-            stableOutForWethIn = sushiswapStableOutForWethIn;
-            dexForWeth = sushiswapRouter;
-        }
-
-        if (uniswapStableOutForLinkIn > sushiswapStableOutForLinkIn) {
-            stableOutForLinkIn = uniswapStableOutForLinkIn;
-            dexForLink = uniswapV2Router;
-        } else {
-            stableOutForLinkIn = sushiswapStableOutForLinkIn;
-            dexForLink = sushiswapRouter;
+            token1Out = sushi1Out;
+            dexForToken1 = sushiswapRouter;
         }
     }
 
