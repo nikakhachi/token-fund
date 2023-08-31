@@ -136,6 +136,51 @@ contract WithdrawTest is TokenFundTest {
         assertEq(IERC20(LINK).balanceOf(address(tokenFund)), 0);
     }
 
+    /// @dev test withdrawing of USDC as the only provider with a profit
+    function testWithdrawProfits(uint64 amount) public {
+        vm.assume(amount > 1000000); // More than 1$USDC
+
+        _deposit(USDC, address(this), amount);
+
+        _contractMakingProfit();
+
+        vm.expectEmit(true, false, true, false);
+        emit ProfitMade(address(USDC), 0, block.timestamp);
+        tokenFund.withdrawUSDC();
+
+        _deposit(USDT, address(this), amount);
+
+        _contractMakingProfit();
+
+        vm.expectEmit(true, false, true, false);
+        emit ProfitMade(address(USDT), 0, block.timestamp);
+        tokenFund.withdrawUSDT();
+
+        uint usdcProfits = tokenFund.usdcProfits();
+        uint usdtProfits = tokenFund.usdtProfits();
+
+        uint usdtBalanceBeforeProfits = IERC20(USDT).balanceOf(address(this));
+        uint usdcBalanceBeforeProfits = IERC20(USDC).balanceOf(address(this));
+
+        tokenFund.withdrawProfits();
+
+        assertEq(
+            usdtBalanceBeforeProfits + usdtProfits,
+            IERC20(USDT).balanceOf(address(this))
+        );
+        assertEq(
+            usdcBalanceBeforeProfits + usdcProfits,
+            IERC20(USDC).balanceOf(address(this))
+        );
+    }
+
+    /// @dev test withdrawing of USDC as the only provider with a profit
+    function testWithdrawProfitsAsNonAdmin() public {
+        vm.expectRevert();
+        vm.prank(address(1));
+        tokenFund.withdrawProfits();
+    }
+
     function _deposit(
         address _token,
         address _address,

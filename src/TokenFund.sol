@@ -27,6 +27,10 @@ contract TokenFund is
     mapping(address => uint256) public initialUSDCDeposits;
     mapping(address => uint256) public initialUSDTDeposits;
 
+    /// @dev These variables make sure owner withdraws only the profits and not staked tokens
+    uint256 public usdcProfits;
+    uint256 public usdtProfits;
+
     /// @dev This variable is just for DEMONSTRATION Purposes on how the governance works
     /// @dev I'll be using timeLockFunction() in tests to try to vote and execute proposal to make this variable true
     bool public hasProposalExecuted;
@@ -132,6 +136,7 @@ contract TokenFund is
                 msg.sender,
                 initialUSDCDeposits[msg.sender] + allProfit - contractProfit
             );
+            usdcProfits += contractProfit;
             emit ProfitMade(address(usdc), contractProfit, block.timestamp);
         } else {
             usdc.safeTransfer(msg.sender, finalUsdcValue);
@@ -174,12 +179,20 @@ contract TokenFund is
                 msg.sender,
                 initialUSDTDeposits[msg.sender] + allProfit - contractProfit
             );
+            usdtProfits += contractProfit;
             emit ProfitMade(address(usdt), contractProfit, block.timestamp);
         } else {
             usdt.safeTransfer(msg.sender, finalUsdtValue);
         }
 
         delete initialUSDTDeposits[msg.sender];
+    }
+
+    function withdrawProfits() external onlyRole(DEFAULT_ADMIN_ROLE) {
+        usdc.safeTransfer(msg.sender, usdcProfits);
+        usdt.safeTransfer(msg.sender, usdtProfits);
+        usdcProfits = 0;
+        usdtProfits = 0;
     }
 
     // /**
