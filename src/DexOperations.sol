@@ -7,7 +7,7 @@ import "./IUniswapV2Router01.sol";
 import "forge-std/console.sol";
 
 contract DexOperations {
-    using SafeERC20 for ERC20;
+    using SafeERC20 for IERC20;
 
     ERC20 public immutable usdc;
     ERC20 public immutable usdt;
@@ -76,54 +76,27 @@ contract DexOperations {
     }
 
     function _swapTokens(
-        ERC20 _stableCoin,
-        IUniswapV2Router01 dexForWeth,
-        IUniswapV2Router01 dexForLink,
-        uint256 amount,
-        address[] memory wethPath,
-        address[] memory linkPath
+        IUniswapV2Router01 _dexForToken0,
+        IUniswapV2Router01 _dexForToken1,
+        uint256 _amountIn0,
+        uint256 _amountIn1,
+        address[] memory _path0,
+        address[] memory _path1
     ) internal {
-        _stableCoin.safeApprove(address(dexForWeth), amount);
-        dexForWeth.swapExactTokensForTokens(
-            amount,
+        IERC20(_path0[0]).safeApprove(address(_dexForToken0), _amountIn0);
+        _dexForToken0.swapExactTokensForTokens(
+            _amountIn0,
             0,
-            wethPath,
+            _path0,
             address(this),
             block.timestamp
         );
 
-        _stableCoin.safeApprove(address(dexForLink), amount);
-        dexForLink.swapExactTokensForTokens(
-            amount,
+        IERC20(_path1[0]).safeApprove(address(_dexForToken1), _amountIn1);
+        _dexForToken1.swapExactTokensForTokens(
+            _amountIn1,
             0,
-            linkPath,
-            address(this),
-            block.timestamp
-        );
-    }
-
-    function _getStablesInSwap(
-        IUniswapV2Router01 dexForWeth,
-        IUniswapV2Router01 dexForLink,
-        uint256 wethIn,
-        uint256 linkIn,
-        address[] memory wethPath,
-        address[] memory linkPath
-    ) internal {
-        weth.safeApprove(address(dexForWeth), wethIn);
-        dexForWeth.swapExactTokensForTokens(
-            wethIn,
-            0,
-            wethPath,
-            address(this),
-            block.timestamp
-        );
-
-        link.safeApprove(address(dexForLink), linkIn);
-        dexForLink.swapExactTokensForTokens(
-            linkIn,
-            0,
-            linkPath,
+            _path1,
             address(this),
             block.timestamp
         );

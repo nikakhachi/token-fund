@@ -55,9 +55,9 @@ contract TokenFund is ERC20, DexOperations {
             );
 
         _swapTokens(
-            usdc,
             dexForWeth,
             dexForLink,
+            halfAmount,
             halfAmount,
             usdcToWethPath,
             usdcToLinkPath
@@ -94,9 +94,9 @@ contract TokenFund is ERC20, DexOperations {
             );
 
         _swapTokens(
-            usdt,
             dexForWeth,
             dexForLink,
+            halfAmount,
             halfAmount,
             usdtToWethPath,
             usdtToLinkPath
@@ -134,7 +134,7 @@ contract TokenFund is ERC20, DexOperations {
             uint256 usdcOutForLinkIn
         ) = _getDexBestPrices(wethOut, linkOut, wethToUsdcPath, linkToUsdcPath);
 
-        _getStablesInSwap(
+        _swapTokens(
             dexForWethToUsdc,
             dexForLinkToUsdc,
             wethOut,
@@ -164,8 +164,6 @@ contract TokenFund is ERC20, DexOperations {
         uint linkReserve = link.balanceOf(address(this));
         uint _totalSupply = totalSupply();
 
-        console.log(linkReserve);
-
         /// @dev Shares = x△ / x * T = y△ / y * T
         uint wethOut = (shares * wethReserve) / _totalSupply;
         uint linkOut = (shares * linkReserve) / _totalSupply;
@@ -187,7 +185,7 @@ contract TokenFund is ERC20, DexOperations {
             uint256 usdtOutForLinkIn
         ) = _getDexBestPrices(wethOut, linkOut, wethToUsdtPath, linkToUsdtPath);
 
-        _getStablesInSwap(
+        _swapTokens(
             dexForWethToUsdt,
             dexForLinkToUsdt,
             wethOut,
