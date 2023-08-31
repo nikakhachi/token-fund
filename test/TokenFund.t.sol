@@ -74,7 +74,5 @@ contract TokenFundTest is Test {
         timeLock.grantRole(proposerRole, address(myGovernor));
         timeLock.grantRole(executorRole, address(0));
         timeLock.revokeRole(timelockAdminRole, address(this));
-
-        timeLock.acceptOwnership(address(tokenFund));
     }
 }

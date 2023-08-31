@@ -26,8 +26,4 @@ contract TimeLock is TimelockController {
         address[] memory proposers,
         address[] memory executors
     ) TimelockController(minDelay, proposers, executors, msg.sender) {}
-
-    function acceptOwnership(address _address) external {
-        TokenFund(_address).acceptOwnership();
-    }
 }

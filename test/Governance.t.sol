@@ -103,6 +103,11 @@ contract GovernanceTest is TokenFundTest {
         );
     }
 
+    function testCallTimelockFunctionFromEOA() public {
+        vm.expectRevert();
+        tokenFund.timeLockFunction();
+    }
+
     /// @dev Helper and reusable functions to make tests easier
 
     function _beforeEach(uint256 usdt1, uint256 usdt2, uint256 usdt3) internal {

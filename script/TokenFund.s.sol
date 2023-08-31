@@ -68,8 +68,6 @@ contract TokenFundScript is Script {
         timeLock.grantRole(executorRole, address(0));
         timeLock.revokeRole(timelockAdminRole, address(this));
 
-        timeLock.acceptOwnership(address(tokenFund));
-
         vm.stopBroadcast();
     }
 }

@@ -3,13 +3,13 @@ pragma solidity ^0.8.20;
 
 import "./MathHelpers.sol";
 import "./DexOperations.sol";
-import "openzeppelin/access/Ownable2Step.sol";
+import "openzeppelin/access/AccessControl.sol";
 import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 
 contract TokenFund is
     DexOperations,
-    Ownable2Step,
+    AccessControl,
     ERC20,
     ERC20Permit,
     ERC20Votes
@@ -30,6 +30,9 @@ contract TokenFund is
     /// @dev This variable is just for DEMONSTRATION Purposes on how the governance works
     /// @dev I'll be using timeLockFunction() in tests to try to vote and execute proposal to make this variable true
     bool public hasProposalExecuted;
+
+    /// @dev Timelock role for governing
+    bytes32 public constant TIMELOCK_ROLE = keccak256("TIMELOCK_ROLE"); /// @dev Role identifier for agents
 
     constructor(
         address _timelock,
@@ -52,7 +55,8 @@ contract TokenFund is
             _sushiswapRouter
         )
     {
-        transferOwnership(_timelock);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(TIMELOCK_ROLE, _timelock);
         profitFee = _profitFee;
     }
 
@@ -205,7 +209,7 @@ contract TokenFund is
 
     /// @dev This function is just for DEMONSTRATION Purposes on how the governance works
     /// @dev I'm using this function in tests to propose, vote and execute proposals
-    function timeLockFunction() external onlyOwner {
+    function timeLockFunction() external onlyRole(TIMELOCK_ROLE) {
         hasProposalExecuted = true;
     }
 
