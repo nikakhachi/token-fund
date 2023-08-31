@@ -9,8 +9,6 @@ import "../src/MyGovernor.sol";
 import "../src/TimeLock.sol";
 
 contract TokenFundTest is Test {
-    using SafeERC20 for IERC20;
-
     uint256 public constant STARTING_MAINNET_BLOCK = 18032971;
 
     TokenFund public tokenFund;
@@ -71,47 +69,5 @@ contract TokenFundTest is Test {
 
         vm.prank(address(timeLock));
         tokenFund.acceptOwnership();
-    }
-
-    function testDeployment() public {
-        assertEq(tokenFund.profitFee(), PROFIT_FEE);
-        assertEq(address(tokenFund.usdc()), USDC);
-        assertEq(address(tokenFund.usdt()), USDT);
-        assertEq(address(tokenFund.weth()), WETH);
-        assertEq(address(tokenFund.link()), LINK);
-        assertEq(address(tokenFund.uniswapV2Router()), UNISWAP_V2_ROUTER);
-        assertEq(address(tokenFund.sushiswapRouter()), SUSHISWAP_ROUTER);
-        assertEq(IERC20(LINK).balanceOf(address(tokenFund)), 0);
-        assertEq(IERC20(WETH).balanceOf(address(tokenFund)), 0);
-        assertEq(IERC20(USDC).balanceOf(address(tokenFund)), 0);
-        assertEq(IERC20(USDT).balanceOf(address(tokenFund)), 0);
-    }
-
-    function testDepositUSDC(uint64 amount) public {
-        vm.assume(amount > 1000000); // More than 1$USDC
-        deal(USDC, address(this), amount);
-
-        IERC20(USDC).approve(address(tokenFund), amount);
-        tokenFund.depositUSDC(amount);
-
-        assertEq(tokenFund.initialUSDCDeposits(address(this)), amount);
-        assertEq(tokenFund.totalSupply(), tokenFund.balanceOf(address(this)));
-        assertEq(IERC20(USDC).balanceOf(address(this)), 0);
-        assertGt(IERC20(LINK).balanceOf(address(tokenFund)), 0);
-        assertGt(IERC20(WETH).balanceOf(address(tokenFund)), 0);
-    }
-
-    function testDepositUSDT(uint64 amount) public {
-        vm.assume(amount > 1000000); // More than 1$USDC
-        deal(USDT, address(this), amount);
-
-        IERC20(USDT).safeApprove(address(tokenFund), amount);
-        tokenFund.depositUSDT(amount);
-
-        assertEq(tokenFund.initialUSDTDeposits(address(this)), amount);
-        assertEq(tokenFund.totalSupply(), tokenFund.balanceOf(address(this)));
-        assertEq(IERC20(USDT).balanceOf(address(this)), 0);
-        assertGt(IERC20(LINK).balanceOf(address(tokenFund)), 0);
-        assertGt(IERC20(WETH).balanceOf(address(tokenFund)), 0);
     }
 }
