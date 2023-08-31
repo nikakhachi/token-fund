@@ -6,6 +6,10 @@ import "openzeppelin/token/ERC20/utils/SafeERC20.sol";
 import "./IUniswapV2Router01.sol";
 import "forge-std/console.sol";
 
+/**
+ * @title DexOperations Contract
+ * @author Nika Khachiashvili
+ */
 contract DexOperations {
     using SafeERC20 for IERC20;
 
@@ -17,6 +21,14 @@ contract DexOperations {
     IUniswapV2Router01 public immutable uniswapV2Router;
     IUniswapV2Router01 public immutable sushiswapRouter;
 
+    /// @dev Contract constructor
+    /// @dev Is called only once on the deployment
+    /// @param _usdc Address of the USDC token
+    /// @param _usdt Address of the USDT token
+    /// @param _weth Address of the WETH token
+    /// @param _link Address of the LINK token
+    /// @param _uniswapV2Router Address of the UniswapV2Router
+    /// @param _sushiswapRouter Address of the SushiswapRouter
     constructor(
         address _usdc,
         address _usdt,
@@ -33,6 +45,15 @@ contract DexOperations {
         sushiswapRouter = IUniswapV2Router01(_sushiswapRouter);
     }
 
+    /// @dev Function for finding the best available price in Uniswap vs Sushiswap and swapping the tokens for the best price
+    /// @param _amount0In Amount of the first token to swap
+    /// @param _amount1In Amount of the second token to swap
+    /// @param _token0In Address of the first token to swap
+    /// @param _token0Out Address of the first token to receive
+    /// @param _token1In Address of the second token to swap
+    /// @param _token1Out Address of the second token to receive
+    /// @return token0AmountOut Amount of the first token received
+    /// @return token1AmountOut Amount of the second token received
     function _swapForBestPrice(
         uint256 _amount0In,
         uint256 _amount1In,

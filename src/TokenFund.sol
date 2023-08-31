@@ -7,6 +7,11 @@ import "openzeppelin/access/AccessControl.sol";
 import {ERC20Permit} from "openzeppelin/token/ERC20/extensions/ERC20Permit.sol";
 import {ERC20Votes} from "openzeppelin/token/ERC20/extensions/ERC20Votes.sol";
 
+/**
+ * @title TokenFund Contract
+ * @author Nika Khachiashvili
+ * @dev Token Fund Contract
+ */
 contract TokenFund is
     DexOperations,
     AccessControl,
@@ -24,6 +29,7 @@ contract TokenFund is
 
     uint16 public immutable profitFee; /// @dev 100 = 1%
 
+    /// @dev mappings to keep track of initial deposits to calculate profits later
     mapping(address => uint256) public initialUSDCDeposits;
     mapping(address => uint256) public initialUSDTDeposits;
 
@@ -38,6 +44,16 @@ contract TokenFund is
     /// @dev Timelock role for governing
     bytes32 public constant TIMELOCK_ROLE = keccak256("TIMELOCK_ROLE"); /// @dev Role identifier for agents
 
+    /// @dev Contract constructor
+    /// @dev Is called only once on the deployment
+    /// @param _timelock Address of the timelock contract
+    /// @param _profitFee Fee that will be taken from profits | 100 = 1%
+    /// @param _usdc Address of the USDC token
+    /// @param _usdt Address of the USDT token
+    /// @param _weth Address of the WETH token
+    /// @param _link Address of the LINK token
+    /// @param _uniswapV2Router Address of the UniswapV2Router
+    /// @param _sushiswapRouter Address of the SushiswapRouter
     constructor(
         address _timelock,
         uint16 _profitFee,
@@ -64,6 +80,10 @@ contract TokenFund is
         profitFee = _profitFee;
     }
 
+    /// @notice Deposit USDC tokens to the contract
+    /// @dev depositUSDC() and depositUSDT() are separated because to avoid the extra token checks in the function.
+    /// @dev Sure, it can be done in one function but this way we are making contract gas efficient for the users, as opposed to deployer
+    /// @param amount Amount of USDC tokens to deposit
     function depositUSDC(uint256 amount) external {
         usdc.safeTransferFrom(msg.sender, address(this), amount);
 
@@ -83,6 +103,10 @@ contract TokenFund is
         _mintShares(wethOut, linkOut);
     }
 
+    /// @notice Deposit USDT tokens to the contract
+    /// @dev depositUSDC() and depositUSDT() are separated because to avoid the extra token checks in the function.
+    /// @dev Sure, it can be done in one function but this way we are making contract gas efficient for the users, as opposed to deployer
+    /// @param amount Amount of USDT tokens to deposit
     function depositUSDT(uint256 amount) external {
         usdt.safeTransferFrom(msg.sender, address(this), amount);
 
@@ -102,12 +126,17 @@ contract TokenFund is
         _mintShares(wethOut, linkOut);
     }
 
+    /// @notice Withdraw USDC tokens from the contract and get potential profits (or not)
+    /// @dev withdrawUSDC() and withdrawUSDT() are separated because to avoid the extra token checks in the function.
+    /// @dev Sure, it can be done in one function but this way we are making contract gas efficient for the users, as opposed to deployer
     function withdrawUSDC() external {
         uint shares = balanceOf(msg.sender);
         uint wethReserve = weth.balanceOf(address(this));
         uint linkReserve = link.balanceOf(address(this));
         uint _totalSupply = totalSupply();
 
+        /// @dev This is the formula used in AMM pools to calculate shares in the pool
+        /// @dev And assets respective to LP
         /// @dev Shares = x△ / x * T = y△ / y * T
         uint wethOut = (shares * wethReserve) / _totalSupply;
         uint linkOut = (shares * linkReserve) / _totalSupply;
@@ -145,12 +174,17 @@ contract TokenFund is
         delete initialUSDCDeposits[msg.sender];
     }
 
+    /// @notice Withdraw USDT tokens from the contract and get potential profits (or not)
+    /// @dev withdrawUSDC() and withdrawUSDT() are separated because to avoid the extra token checks in the function.
+    /// @dev Sure, it can be done in one function but this way we are making contract gas efficient for the users, as opposed to deployer
     function withdrawUSDT() external {
         uint shares = balanceOf(msg.sender);
         uint wethReserve = weth.balanceOf(address(this));
         uint linkReserve = link.balanceOf(address(this));
         uint _totalSupply = totalSupply();
 
+        /// @dev This is the formula used in AMM pools to calculate shares in the pool
+        /// @dev And assets respective to LP
         /// @dev Shares = x△ / x * T = y△ / y * T
         uint wethOut = (shares * wethReserve) / _totalSupply;
         uint linkOut = (shares * linkReserve) / _totalSupply;
@@ -188,6 +222,8 @@ contract TokenFund is
         delete initialUSDTDeposits[msg.sender];
     }
 
+    /// @notice Admins function to withdraw the profits
+    /// @dev This function is only callable by the deployer who gets the DEFAULT_ADMIN_ROLE role
     function withdrawProfits() external onlyRole(DEFAULT_ADMIN_ROLE) {
         usdc.safeTransfer(msg.sender, usdcProfits);
         usdt.safeTransfer(msg.sender, usdtProfits);
@@ -204,6 +240,9 @@ contract TokenFund is
     //  * --------------------------------------------------------------------------
     //  */
 
+    /// @dev Function to calculate shares based on the user provided assets and the existing asset amounts
+    /// @dev This is the formula used in AMM pools to calculate shares in the pool
+    /// @dev And assets respective to LP
     function _mintShares(uint256 wethOut, uint256 linkOut) internal {
         uint256 _totalSupply = totalSupply();
         uint256 shares;
