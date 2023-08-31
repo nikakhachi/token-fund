@@ -66,6 +66,6 @@ To deploy the smart contract locally you can run:
 
 1. `anvil` to run a local node.
 
-And then follow the 2 steps above
+And then follow the 2 steps above and replace `{RPC_URL}` in step2 with `http://localhost:8545`
 
 Read More About the Deployment from the [Foundry Book](https://book.getfoundry.sh/forge/deploying)
